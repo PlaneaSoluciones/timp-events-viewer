@@ -340,7 +340,6 @@ Para problemas específicos del plugin de WordPress, contacta con el desarrollad
 
 Posibles mejoras para futuras versiones:
 
-- [ ] Caché de sesiones para mejorar rendimiento
 - [ ] Filtros por actividad/instructor/sala
 - [ ] Búsqueda de sesiones
 - [ ] Vista de calendario mensual
@@ -356,7 +355,7 @@ Posibles mejoras para futuras versiones:
 - **Solo lectura:** La API actual de TIMP es solo de lectura, no permite crear o modificar sesiones
 - **Límite de peticiones:** Evita hacer demasiadas peticiones seguidas a la API
 - **Autorización necesaria:** El centro debe autorizar explícitamente tu aplicación
-- **Datos en tiempo real:** Los datos se obtienen directamente de TIMP en cada carga
+- **Caché corta:** Las sesiones se cachean 5 minutos (por centro y semana) para no saturar la API de TIMP; pasado ese tiempo se vuelven a obtener en tiempo real
 
 ## 🧪 Testing
 

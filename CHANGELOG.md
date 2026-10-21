@@ -7,6 +7,14 @@ y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.3.5] - 2026-10-21
+
+### Corregido
+
+- Corrige mensajes de "Error de conexión" intermitentes: se añade caché temporal (5 min) de las sesiones para reducir las llamadas a la API de TIMP y se blinda el parseo ante datos incompletos
+- Los mensajes de error ahora distinguen entre timeout, fallo de red y respuesta inválida del servidor, en vez de un mensaje genérico
+- Corrige una pérdida silenciosa de sesiones cuando una actividad tiene admissions repartidas en varias páginas de la API
+
 ## [1.3.4] - 2026-03-04
 
 ### Cambiado
