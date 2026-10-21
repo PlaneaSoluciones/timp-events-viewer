@@ -7,7 +7,7 @@
  * Version: 1.4.0
  * Requires at least: 5.0
  * Requires PHP: 8.2
- * Author: Nacho Fortea
+ * Author: Planea Soluciones
  * Author URI: https://planeasoluciones.com
  * License: GPL v2 or later
  * Text Domain: timp-events
