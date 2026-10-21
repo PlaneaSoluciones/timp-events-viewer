@@ -16,15 +16,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+
+      - name: Instalar dependencias de produccion (Plugin Update Checker)
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
       - name: Create plugin ZIP
         run: |
           mkdir -p dist/timp-events-viewer
           rsync -a \
             --exclude='.git' --exclude='.github' --exclude='.githooks' --exclude='.claude' \
-            --exclude='dist' --exclude='vendor' \
+            --exclude='dist' \
             --exclude='composer.json' --exclude='composer.lock' \
             --exclude='phpcs.xml' --exclude='phpstan.neon' --exclude='phpstan-bootstrap.php' \
-            --exclude='.gitignore' \
+            --exclude='.gitignore' --exclude='.env' \
             . dist/timp-events-viewer/
           cd dist && zip -r ../timp-events-viewer.zip timp-events-viewer/
 

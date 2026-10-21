@@ -4,7 +4,7 @@
  * Plugin Name: TIMP Events Viewer
  * Plugin URI: https://github.com/PlaneaSoluciones/timp-events-viewer/
  * Description: Muestra eventos de TIMP con navegación por semanas
- * Version: 1.3.5
+ * Version: 1.4.0
  * Requires at least: 5.0
  * Requires PHP: 8.2
  * Author: Nacho Fortea
@@ -16,6 +16,25 @@
 // Evitar acceso directo
 if (!defined('ABSPATH')) {
     exit;
+}
+
+// Comprobación de actualizaciones contra las Releases de GitHub (Plugin Update Checker).
+// El ZIP adjunto a cada Release ya lo genera release-php.yml sin ficheros de desarrollo.
+if (is_admin() && file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+
+    $timp_events_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+        'https://github.com/PlaneaSoluciones/timp-events-viewer/',
+        __FILE__,
+        'timp-events-viewer'
+    );
+
+    // getVcsApi() devuelve el tipo base Vcs\Api; enableReleaseAssets() solo existe en la
+    // implementación concreta de GitHub, cuyo nombre de clase real vive en un namespace
+    // versionado interno de la librería (ej. v5p7) que cambia con cada actualización —
+    // por eso no se puede comprobar con instanceof sin acoplarse a esa versión interna.
+    // @phpstan-ignore method.notFound
+    $timp_events_update_checker->getVcsApi()->enableReleaseAssets();
 }
 
 class TIMP_Events_Plugin
