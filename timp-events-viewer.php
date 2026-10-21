@@ -2,9 +2,11 @@
 
 /**
  * Plugin Name: TIMP Events Viewer
- * Plugin URI: https://github.com/nfortea/timp-events-viewer/
+ * Plugin URI: https://github.com/PlaneaSoluciones/timp-events-viewer/
  * Description: Muestra eventos de TIMP con navegación por semanas
  * Version: 1.3.4
+ * Requires at least: 5.0
+ * Requires PHP: 8.2
  * Author: Nacho Fortea
  * Author URI: https://planeasoluciones.com
  * License: GPL v2 or later
@@ -49,9 +51,9 @@ class TIMP_Events_Plugin
     // Registrar ajustes
     public function register_settings()
     {
-        register_setting('timp_events_settings', 'timp_api_key');
-        register_setting('timp_events_settings', 'timp_center_uuid');
-        register_setting('timp_events_settings', 'timp_booking_url');
+        register_setting('timp_events_settings', 'timp_api_key', array('sanitize_callback' => 'sanitize_text_field'));
+        register_setting('timp_events_settings', 'timp_center_uuid', array('sanitize_callback' => 'sanitize_text_field'));
+        register_setting('timp_events_settings', 'timp_booking_url', array('sanitize_callback' => 'esc_url_raw'));
     }
 
     // Manejar obtención de centros

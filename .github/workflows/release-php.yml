@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create plugin ZIP
+        run: |
+          mkdir -p dist/timp-events-viewer
+          rsync -a \
+            --exclude='.git' --exclude='.github' --exclude='.githooks' --exclude='.claude' \
+            --exclude='dist' --exclude='vendor' \
+            --exclude='composer.json' --exclude='composer.lock' \
+            --exclude='phpcs.xml' --exclude='phpstan.neon' --exclude='phpstan-bootstrap.php' \
+            --exclude='.gitignore' \
+            . dist/timp-events-viewer/
+          cd dist && zip -r ../timp-events-viewer.zip timp-events-viewer/
+
+      # Si el proyecto tiene deploy SFTP automático, añadir el step aquí.
+      # Ver ejemplo en cozy-doodling-aurora.md (lftp mirror --reverse --delete).
+      # Secrets necesarios: SFTP_HOST, SFTP_USERNAME, SFTP_PASSWORD.
+
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          awk "/^## \[${VERSION}\]/{found=1; next} found && /^## /{exit} found{print}" CHANGELOG.md > NOTES.md
+          if [ ! -s NOTES.md ]; then
+            echo "No se encontró la sección ${VERSION} en CHANGELOG.md" && exit 1
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --notes-file NOTES.md \
+            timp-events-viewer.zip

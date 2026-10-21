@@ -1,0 +1,21 @@
+{
+    "name": "planeasoluciones/timp-events-viewer",
+    "description": "Plugin WordPress que muestra sesiones/eventos de TIMP con navegación por semanas",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=8.2,<8.6"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.9,<4.0",
+        "wp-coding-standards/wpcs": "^3.1,<4.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0,<2.0",
+        "phpstan/phpstan": "^2.0,<3.0",
+        "szepeviktor/phpstan-wordpress": "^2.0,<3.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
