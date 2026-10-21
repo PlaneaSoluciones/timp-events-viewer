@@ -124,7 +124,7 @@ Para cada sesión se muestra:
 
 ## 🔧 API de TIMP - Detalles Técnicos
 
-El plugin utiliza la API REST de TIMP v1:
+El plugin utiliza la API REST de TIMP v1. Documentación oficial: [docs.timp.pro](https://docs.timp.pro/).
 
 ### Endpoints Utilizados
 
@@ -143,8 +143,10 @@ GET https://api.timp.pro/api/timp/v1/branch_buildings/{center_uuid}/activities
 #### 3. Obtener sesiones de una actividad
 
 ```http
-GET https://api.timp.pro/api/timp/v1/activities/{activity_uuid}/admissions?date_from=YYYY-MM-DD&date_to=YYYY-MM-DD
+GET https://api.timp.pro/api/timp/v1/activities/{activity_uuid}/admissions?date_from=YYYY-MM-DD&date_to=YYYY-MM-DD&page=1
 ```
+
+> ⚠️ **Límite de rango de fechas (verificado 2026-10-21):** `date_to` no puede estar más de **1 mes** después de `date_from` — la API devuelve `400 Bad Request` ("El rango de fechas no puede ser superior a un mes") si se supera. El plugin nunca pide más de una semana a la vez, así que no le afecta, pero hay que tenerlo en cuenta para scripts de diagnóstico o futuras funcionalidades. La respuesta puede venir paginada (ver `page_data` abajo); el plugin ya recorre todas las páginas.
 
 ### Headers Requeridos
 
@@ -184,22 +186,26 @@ Accept: application/timp.timp-v1
 
 ### Estructura de Respuesta - Admissions (Sesiones)
 
+> **Nota sobre fechas (verificado 2026-10-21):** `starting_at`/`ending_at` vienen en UTC (sufijo `Z`), no con el offset local `+01:00` que mostraba una versión anterior de este ejemplo. `new DateTime()` en PHP interpreta el offset correctamente en cualquier caso, así que las comparaciones del plugin no se ven afectadas, pero si se procesan estos valores "a mano" hay que convertir explícitamente a `Europe/Madrid` para mostrarlos.
+
 ```json
 {
   "collection": [
     {
-      "starting_at": "2026-02-16T19:00:00.000+01:00",
-      "ending_at": "2026-02-16T20:00:00.000+01:00",
+      "starting_at": "2026-11-04T17:00:00.000Z",
+      "ending_at": "2026-11-04T18:00:00.000Z",
       "activity_uuid": "9721651b-18e2-43b1-b0c8-f1acc57c0fad",
-      "professional_name": "REBECA PEREZ ROLDAN",
-      "capacity": 8,
-      "bookings_count": 6
+      "professional_name": "NOMBRE APELLIDO",
+      "capacity": 7,
+      "bookings_count": 4
     }
   ],
   "page_data": {
     "current_page": 1,
+    "next_page": null,
+    "prev_page": null,
     "total_pages": 1,
-    "total_count": 8
+    "total_count": 3
   }
 }
 ```
