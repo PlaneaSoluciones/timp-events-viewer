@@ -2,62 +2,9 @@
 
 Plugin oficial para mostrar sesiones/eventos de TIMP con navegación por semanas. Integración directa con la API de TIMP v1.
 
-## 📌 Versión Actual: 1.3.4
-
 ## 📜 Changelog
 
-### [1.3.4] - 2026-03-04
-
-#### Cambios
-
-* Mueve botón Reservar a la misma línea que duración y aforo para reducir altura de tarjetas
-
-
-### [1.3.3] - 2026-03-02
-
-#### Cambios
-
-* Corrige versión incorrecta a 1.3.2 generada por workflow con regex fallida
-
-
-### [1.3.2] - 2026-03-02
-
-#### Cambios
-
-* Elimina badge 'Pocas plazas', solo se muestra badge en clases completas
-
-
-### [1.3.1] - 2026-02-17
-
-#### Mejorado
-
-- Mejora de indentación en código HTML del formulario de configuración
-- Limpieza de comentarios obsoletos en botones de navegación
-- Agregada clase `timp-nav-btn` a botones de navegación para mejor control de estilos
-- Corrección de formato de código para mejor legibilidad
-
-### [1.3.0] - 2026-02-17
-
-#### Añadido
-
-- Detección automática de centros autorizados
-- Selector desplegable para centros
-- Función de prueba de conexión en panel de administración
-- Botón para obtener centros autorizados
-- Mejor manejo de errores con detalles específicos
-- Configuración de URL de reservas
-- Logs de debugging mejorados
-
-### [1.0.0] - 2026-02-16
-
-#### Inicial
-
-- Primera versión del plugin
-- Integración con API de TIMP v1
-- Navegación por semanas
-- Selector de días
-- Vista responsive
-- Shortcode `[timp_events]`
+Ver [CHANGELOG.md](CHANGELOG.md) para el historial completo de versiones.
 
 ## 📋 Estructura de Archivos
 
@@ -346,7 +293,7 @@ if (event.tu_campo) {
 ### WordPress
 
 - WordPress 5.0 o superior
-- PHP 7.2 o superior
+- PHP 8.2 o superior
 - jQuery (incluido por defecto en WordPress)
 
 ### Navegadores

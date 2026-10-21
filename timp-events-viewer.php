@@ -2,9 +2,11 @@
 
 /**
  * Plugin Name: TIMP Events Viewer
- * Plugin URI: https://github.com/nfortea/timp-events-viewer/
+ * Plugin URI: https://github.com/PlaneaSoluciones/timp-events-viewer/
  * Description: Muestra eventos de TIMP con navegación por semanas
  * Version: 1.3.4
+ * Requires at least: 5.0
+ * Requires PHP: 8.2
  * Author: Nacho Fortea
  * Author URI: https://planeasoluciones.com
  * License: GPL v2 or later
@@ -20,7 +22,6 @@ class TIMP_Events_Plugin
 {
 
     private $api_url = 'https://api.timp.pro/api';
-    private $api_base = 'https://api.timp.pro';
 
     public function __construct()
     {
@@ -49,15 +50,15 @@ class TIMP_Events_Plugin
     // Registrar ajustes
     public function register_settings()
     {
-        register_setting('timp_events_settings', 'timp_api_key');
-        register_setting('timp_events_settings', 'timp_center_uuid');
-        register_setting('timp_events_settings', 'timp_booking_url');
+        register_setting('timp_events_settings', 'timp_api_key', array('sanitize_callback' => 'sanitize_text_field'));
+        register_setting('timp_events_settings', 'timp_center_uuid', array('sanitize_callback' => 'sanitize_text_field'));
+        register_setting('timp_events_settings', 'timp_booking_url', array('sanitize_callback' => 'esc_url_raw'));
     }
 
     // Manejar obtención de centros
     public function handle_fetch_centers()
     {
-        if (!isset($_POST['timp_fetch_centers']) || !wp_verify_nonce($_POST['_wpnonce'], 'timp_fetch_centers_nonce')) {
+        if (!isset($_POST['timp_fetch_centers']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'] ?? '')), 'timp_fetch_centers_nonce')) {
             return;
         }
 
@@ -94,7 +95,7 @@ class TIMP_Events_Plugin
     // Manejar prueba de conexión
     public function handle_test_connection()
     {
-        if (!isset($_POST['timp_test_connection']) || !wp_verify_nonce($_POST['_wpnonce'], 'timp_test_connection_nonce')) {
+        if (!isset($_POST['timp_test_connection']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'] ?? '')), 'timp_test_connection_nonce')) {
             return;
         }
 
@@ -319,6 +320,7 @@ class TIMP_Events_Plugin
         }
 
         // También cargar si hay el parámetro de página (para debugging)
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- solo activa un flag de depuración, no procesa datos del formulario
         if (isset($_GET['timp_debug'])) {
             $has_shortcode = true;
         }
@@ -509,7 +511,7 @@ class TIMP_Events_Plugin
     {
         check_ajax_referer('timp_events_nonce', 'nonce');
 
-        $week_offset = isset($_POST['week_offset']) ? intval($_POST['week_offset']) : 0;
+        $week_offset = isset($_POST['week_offset']) ? intval(wp_unslash($_POST['week_offset'])) : 0;
         $center_uuid = get_option('timp_center_uuid');
 
         if (empty($center_uuid)) {
@@ -517,7 +519,6 @@ class TIMP_Events_Plugin
             wp_send_json_error(array(
                 'message' => 'UUID del Centro no configurado'
             ));
-            return;
         }
 
         // Calcular fechas de la semana
@@ -542,7 +543,6 @@ class TIMP_Events_Plugin
 
             error_log('TIMP Error: ' . $sessions['error']);
             wp_send_json_error($error_response);
-            return;
         }
 
         wp_send_json_success(array(

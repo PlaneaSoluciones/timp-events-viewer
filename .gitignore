@@ -8,6 +8,13 @@ wp-content/cache/
 node_modules/
 package-lock.json
 
+# Composer
+vendor/
+
+# Build
+dist/
+*.zip
+
 # IDE
 .vscode/
 .idea/

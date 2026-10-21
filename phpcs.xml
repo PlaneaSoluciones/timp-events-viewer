@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<ruleset name="TIMP Events Viewer">
+    <description>Estándar de codificación para el plugin TIMP Events Viewer</description>
+
+    <file>.</file>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/dist/*</exclude-pattern>
+
+    <arg value="sp"/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+
+    <config name="minimum_supported_wp_version" value="5.0"/>
+    <config name="testVersion" value="8.2-"/>
+
+    <!--
+    El código del proyecto se escribió con indentación de 4 espacios y estilo de llaves propio,
+    no con el estilo (tabs, PEAR.Functions.FunctionCallSignature, etc.) que asume
+    WordPress-Extra/WordPress-Core. Forzar esos sniffs de formato aquí implicaría reformatear
+    todo el fichero sin relación con el objetivo real del lint: seguridad y buenas prácticas de
+    WordPress. Por eso solo se activan las categorías de seguridad/i18n/BD, no las de estilo.
+    -->
+    <rule ref="WordPress.Security"/>
+    <rule ref="WordPress.DB"/>
+    <rule ref="WordPress.PHP.NoSilencedErrors"/>
+
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="timp"/>
+                <element value="TIMP"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>
