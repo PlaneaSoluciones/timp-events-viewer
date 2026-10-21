@@ -29,10 +29,12 @@ if (is_admin() && file_exists(__DIR__ . '/vendor/autoload.php')) {
         'timp-events-viewer'
     );
 
-    $timp_events_vcs_api = $timp_events_update_checker->getVcsApi();
-    if ($timp_events_vcs_api instanceof \YahnisElsts\PluginUpdateChecker\v5\Vcs\GitHubApi) {
-        $timp_events_vcs_api->enableReleaseAssets();
-    }
+    // getVcsApi() devuelve el tipo base Vcs\Api; enableReleaseAssets() solo existe en la
+    // implementación concreta de GitHub, cuyo nombre de clase real vive en un namespace
+    // versionado interno de la librería (ej. v5p7) que cambia con cada actualización —
+    // por eso no se puede comprobar con instanceof sin acoplarse a esa versión interna.
+    // @phpstan-ignore method.notFound
+    $timp_events_update_checker->getVcsApi()->enableReleaseAssets();
 }
 
 class TIMP_Events_Plugin
