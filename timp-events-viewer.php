@@ -58,7 +58,7 @@ class TIMP_Events_Plugin
     // Manejar obtención de centros
     public function handle_fetch_centers()
     {
-        if (!isset($_POST['timp_fetch_centers']) || !wp_verify_nonce($_POST['_wpnonce'], 'timp_fetch_centers_nonce')) {
+        if (!isset($_POST['timp_fetch_centers']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'] ?? '')), 'timp_fetch_centers_nonce')) {
             return;
         }
 
@@ -95,7 +95,7 @@ class TIMP_Events_Plugin
     // Manejar prueba de conexión
     public function handle_test_connection()
     {
-        if (!isset($_POST['timp_test_connection']) || !wp_verify_nonce($_POST['_wpnonce'], 'timp_test_connection_nonce')) {
+        if (!isset($_POST['timp_test_connection']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'] ?? '')), 'timp_test_connection_nonce')) {
             return;
         }
 
@@ -510,7 +510,7 @@ class TIMP_Events_Plugin
     {
         check_ajax_referer('timp_events_nonce', 'nonce');
 
-        $week_offset = isset($_POST['week_offset']) ? intval($_POST['week_offset']) : 0;
+        $week_offset = isset($_POST['week_offset']) ? intval(wp_unslash($_POST['week_offset'])) : 0;
         $center_uuid = get_option('timp_center_uuid');
 
         if (empty($center_uuid)) {

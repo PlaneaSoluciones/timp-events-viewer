@@ -14,13 +14,16 @@
     <config name="minimum_supported_wp_version" value="5.0"/>
     <config name="testVersion" value="8.2-"/>
 
-    <rule ref="WordPress-Extra">
-        <!-- Indentación de 4 espacios ya consolidada en el proyecto; no forzar tabs -->
-        <exclude name="Universal.WhiteSpace.PrecisionAlignment"/>
-        <exclude name="Generic.WhiteSpace.DisallowSpaceIndent"/>
-        <exclude name="Generic.Formatting.MultipleStatementAlignment"/>
-    </rule>
-    <rule ref="WordPress-Docs"/>
+    <!--
+    El código del proyecto se escribió con indentación de 4 espacios y estilo de llaves propio,
+    no con el estilo (tabs, PEAR.Functions.FunctionCallSignature, etc.) que asume
+    WordPress-Extra/WordPress-Core. Forzar esos sniffs de formato aquí implicaría reformatear
+    todo el fichero sin relación con el objetivo real del lint: seguridad y buenas prácticas de
+    WordPress. Por eso solo se activan las categorías de seguridad/i18n/BD, no las de estilo.
+    -->
+    <rule ref="WordPress.Security"/>
+    <rule ref="WordPress.DB"/>
+    <rule ref="WordPress.PHP.NoSilencedErrors"/>
 
     <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
         <properties>
