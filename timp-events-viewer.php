@@ -22,7 +22,6 @@ class TIMP_Events_Plugin
 {
 
     private $api_url = 'https://api.timp.pro/api';
-    private $api_base = 'https://api.timp.pro';
 
     public function __construct()
     {
@@ -519,7 +518,6 @@ class TIMP_Events_Plugin
             wp_send_json_error(array(
                 'message' => 'UUID del Centro no configurado'
             ));
-            return;
         }
 
         // Calcular fechas de la semana
@@ -544,7 +542,6 @@ class TIMP_Events_Plugin
 
             error_log('TIMP Error: ' . $sessions['error']);
             wp_send_json_error($error_response);
-            return;
         }
 
         wp_send_json_success(array(

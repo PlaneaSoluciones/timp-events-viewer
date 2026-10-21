@@ -16,7 +16,7 @@
 
     <rule ref="WordPress-Extra">
         <!-- Indentación de 4 espacios ya consolidada en el proyecto; no forzar tabs -->
-        <exclude name="WordPress.WhiteSpace.PrecisionAlignment"/>
+        <exclude name="Universal.WhiteSpace.PrecisionAlignment"/>
         <exclude name="Generic.WhiteSpace.DisallowSpaceIndent"/>
         <exclude name="Generic.Formatting.MultipleStatementAlignment"/>
     </rule>
