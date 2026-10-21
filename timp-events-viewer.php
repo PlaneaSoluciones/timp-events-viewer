@@ -4,7 +4,7 @@
  * Plugin Name: TIMP Events Viewer
  * Plugin URI: https://github.com/PlaneaSoluciones/timp-events-viewer/
  * Description: Muestra eventos de TIMP con navegación por semanas
- * Version: 1.3.4
+ * Version: 1.3.5
  * Requires at least: 5.0
  * Requires PHP: 8.2
  * Author: Nacho Fortea
@@ -415,39 +415,47 @@ class TIMP_Events_Plugin
             return array('error' => 'API Access Key no configurada');
         }
 
-        $url = $this->api_url . '/timp/v1/activities/' . $activity_uuid . '/admissions';
-        $url = add_query_arg(array(
-            'date_from' => $date_from,
-            'date_to' => $date_to
-        ), $url);
+        $base_url = $this->api_url . '/timp/v1/activities/' . $activity_uuid . '/admissions';
+        $all_admissions = array();
+        $page = 1;
 
-        $response = wp_remote_get($url, array(
-            'headers' => array(
-                'Api-Access-Key' => $api_key,
-                'Accept' => 'application/timp.timp-v1'
-            ),
-            'timeout' => 15
-        ));
+        do {
+            $url = add_query_arg(array(
+                'date_from' => $date_from,
+                'date_to' => $date_to,
+                'page' => $page
+            ), $base_url);
 
-        if (is_wp_error($response)) {
-            return array('error' => $response->get_error_message());
-        }
+            $response = wp_remote_get($url, array(
+                'headers' => array(
+                    'Api-Access-Key' => $api_key,
+                    'Accept' => 'application/timp.timp-v1'
+                ),
+                'timeout' => 15
+            ));
 
-        $status_code = wp_remote_retrieve_response_code($response);
+            if (is_wp_error($response)) {
+                return array('error' => $response->get_error_message());
+            }
 
-        if ($status_code !== 200) {
-            return array('error' => 'Error al obtener sesiones: ' . $status_code);
-        }
+            $status_code = wp_remote_retrieve_response_code($response);
 
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
+            if ($status_code !== 200) {
+                return array('error' => 'Error al obtener sesiones: ' . $status_code);
+            }
 
-        // Devolver la colección de admissions
-        if (isset($data['collection'])) {
-            return $data['collection'];
-        }
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
 
-        return array();
+            if (isset($data['collection']) && is_array($data['collection'])) {
+                $all_admissions = array_merge($all_admissions, $data['collection']);
+            }
+
+            $total_pages = $data['page_data']['total_pages'] ?? 1;
+            $page++;
+        } while ($page <= $total_pages);
+
+        return $all_admissions;
     }
 
     // Obtener todas las sesiones del centro (combinando todas las actividades)
@@ -476,8 +484,17 @@ class TIMP_Events_Plugin
             if (!isset($admissions['error']) && is_array($admissions)) {
                 // Agregar información de la actividad a cada admission
                 foreach ($admissions as $admission) {
+                    if (empty($admission['starting_at'])) {
+                        continue;
+                    }
+
                     // Filtrar sesiones que ya han comenzado
-                    $session_start = new DateTime($admission['starting_at']);
+                    try {
+                        $session_start = new DateTime($admission['starting_at']);
+                    } catch (Exception $e) {
+                        // Fecha ilegible de la API: saltamos esta sesión en vez de romper la respuesta
+                        continue;
+                    }
 
                     // Solo incluir sesiones que aún no han comenzado
                     if ($session_start > $current_time) {
@@ -486,14 +503,14 @@ class TIMP_Events_Plugin
                             'name' => $activity['name'],
                             'description' => isset($activity['description']) ? $activity['description'] : '',
                             'starts_at' => $admission['starting_at'],
-                            'ends_at' => $admission['ending_at'],
-                            'professional' => array('name' => $admission['professional_name']),
+                            'ends_at' => $admission['ending_at'] ?? null,
+                            'professional' => array('name' => $admission['professional_name'] ?? ''),
                             'activity' => array(
                                 'name' => $activity['name'],
                                 'description' => isset($activity['description']) ? $activity['description'] : ''
                             ),
-                            'capacity' => $admission['capacity'],
-                            'bookings_count' => $admission['bookings_count'],
+                            'capacity' => $admission['capacity'] ?? 0,
+                            'bookings_count' => $admission['bookings_count'] ?? 0,
                             'status' => 'active'
                         );
 
@@ -525,11 +542,22 @@ class TIMP_Events_Plugin
         $start_date = date('Y-m-d', strtotime("monday this week +{$week_offset} weeks"));
         $end_date = date('Y-m-d', strtotime("sunday this week +{$week_offset} weeks"));
 
-        error_log('TIMP: Obteniendo sesiones para centro ' . $center_uuid . ' desde ' . $start_date . ' hasta ' . $end_date);
+        $cache_key = 'timp_events_' . md5($center_uuid . $start_date . $end_date);
+        $sessions = get_transient($cache_key);
 
-        $sessions = $this->get_all_sessions($center_uuid, $start_date, $end_date);
+        if ($sessions === false) {
+            error_log('TIMP: Obteniendo sesiones para centro ' . $center_uuid . ' desde ' . $start_date . ' hasta ' . $end_date);
 
-        error_log('TIMP: Sesiones obtenidas: ' . count($sessions));
+            $sessions = $this->get_all_sessions($center_uuid, $start_date, $end_date);
+
+            error_log('TIMP: Sesiones obtenidas: ' . count($sessions));
+
+            // Solo cacheamos resultados válidos: un fallo puntual de TIMP no debe
+            // quedar "pegado" durante el TTL completo.
+            if (!isset($sessions['error'])) {
+                set_transient($cache_key, $sessions, 5 * MINUTE_IN_SECONDS);
+            }
+        }
 
         if (isset($sessions['error'])) {
             $error_response = array(
@@ -613,6 +641,6 @@ function timp_events_activate()
 register_deactivation_hook(__FILE__, 'timp_events_deactivate');
 function timp_events_deactivate()
 {
-    // Limpiar transients si es necesario
-    delete_transient('timp_events_cache');
+    // Los transients de caché (timp_events_*) expiran solos a los 5 minutos,
+    // no requieren limpieza explícita al desactivar.
 }
