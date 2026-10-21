@@ -39,20 +39,37 @@ No hay build ni servidor local: es un plugin que se instala copiando la carpeta 
 - `css/timp-events.css` — estilos de las tarjetas y navegación.
 - `uninstall.php` — limpia las opciones (`timp_api_key`, `timp_center_uuid`,
   `timp_booking_url`) al desinstalar el plugin desde WordPress.
-- Sin build step, sin dependencias de runtime en Composer/npm — `composer.json` es solo
-  tooling de desarrollo (phpcs/phpstan).
+- Sin build step. `composer.json` mezcla tooling de desarrollo (phpcs/phpstan, `require-dev`,
+  no se instala en el ZIP) con una única dependencia de producción: `yahnis-elsts/plugin-update-checker`
+  (`require`), que sí viaja dentro del plugin — ver sección de actualizaciones automáticas abajo.
 
 ## Workflows
 
 - `pr-title-lint.yml` — valida Conventional Commits en el título de los PRs
 - `secret-scan.yml` — gitleaks en cada push/PR
 - `lint-php.yml` — `php -l` + PHPCS (WordPress Coding Standards) + PHPStan (nivel 5) en cada push/PR
-- `release-php.yml` — al pushear un tag `v*`: genera el ZIP del plugin (excluyendo ficheros de
-  desarrollo), extrae las notas de `CHANGELOG.md` y crea la GitHub Release con el ZIP adjunto
+- `release-php.yml` — al pushear un tag `v*`: corre `composer install --no-dev` (solo trae el
+  Plugin Update Checker, no las herramientas de lint), genera el ZIP del plugin con ese `vendor/`
+  reducido dentro, extrae las notas de `CHANGELOG.md` y crea la GitHub Release con el ZIP adjunto
+  como *release asset*
 
-No hay deploy automático (NAS/SFTP) configurado — la distribución es el ZIP adjunto a cada
-Release, que se instala manualmente en cada WordPress cliente vía
-**Plugins > Añadir nuevo > Subir plugin**.
+No hay deploy automático (NAS/SFTP) configurado.
+
+## Actualizaciones automáticas en WordPress
+
+Desde v1.4.0 el plugin integra [Plugin Update Checker](https://github.com/YahnisElsts/plugin-update-checker)
+(`yahnis-elsts/plugin-update-checker` vía Composer, dependencia de producción). En
+`timp-events-viewer.php`, antes de la clase, se instancia `PucFactory::buildUpdateChecker()`
+apuntando al repo de GitHub y con `enableReleaseAssets()` para que use el ZIP adjunto a la
+Release (el que genera `release-php.yml`) en vez de empaquetar el código fuente crudo del tag.
+
+- Solo corre en `is_admin()` — no carga nada en el front-end.
+- WordPress detecta la actualización de forma nativa (Plugins > "Hay una nueva versión
+  disponible") y se instala con un clic, sin tocar GitHub a mano.
+- Requiere que el repo siga siendo público (no usa token de GitHub); si se vuelve privado hay
+  que configurar `setAuthentication()` con un token.
+- Si `vendor/autoload.php` no existe (ej. clonando el repo en local sin `composer install`), el
+  chequeo de actualizaciones simplemente no se activa — no rompe el resto del plugin.
 
 ## Releases
 

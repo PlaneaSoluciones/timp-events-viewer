@@ -18,6 +18,19 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Comprobación de actualizaciones contra las Releases de GitHub (Plugin Update Checker).
+// El ZIP adjunto a cada Release ya lo genera release-php.yml sin ficheros de desarrollo.
+if (is_admin() && file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+
+    $timp_events_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+        'https://github.com/PlaneaSoluciones/timp-events-viewer/',
+        __FILE__,
+        'timp-events-viewer'
+    );
+    $timp_events_update_checker->getVcsApi()->enableReleaseAssets();
+}
+
 class TIMP_Events_Plugin
 {
 
