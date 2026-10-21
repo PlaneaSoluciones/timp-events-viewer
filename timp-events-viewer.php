@@ -28,7 +28,11 @@ if (is_admin() && file_exists(__DIR__ . '/vendor/autoload.php')) {
         __FILE__,
         'timp-events-viewer'
     );
-    $timp_events_update_checker->getVcsApi()->enableReleaseAssets();
+
+    $timp_events_vcs_api = $timp_events_update_checker->getVcsApi();
+    if ($timp_events_vcs_api instanceof \YahnisElsts\PluginUpdateChecker\v5\Vcs\GitHubApi) {
+        $timp_events_vcs_api->enableReleaseAssets();
+    }
 }
 
 class TIMP_Events_Plugin
