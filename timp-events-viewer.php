@@ -320,6 +320,7 @@ class TIMP_Events_Plugin
         }
 
         // También cargar si hay el parámetro de página (para debugging)
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- solo activa un flag de depuración, no procesa datos del formulario
         if (isset($_GET['timp_debug'])) {
             $has_shortcode = true;
         }
