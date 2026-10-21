@@ -39,6 +39,9 @@ No hay build ni servidor local: es un plugin que se instala copiando la carpeta 
 - `css/timp-events.css` — estilos de las tarjetas y navegación.
 - `uninstall.php` — limpia las opciones (`timp_api_key`, `timp_center_uuid`,
   `timp_booking_url`) al desinstalar el plugin desde WordPress.
+- `readme.txt` (formato WordPress.org) — Plugin Update Checker lo lee del repo de GitHub para
+  rellenar el popup "Ver detalles" cuando hay una actualización disponible (descripción, FAQ,
+  changelog). Mantenerlo sincronizado con `CHANGELOG.md` al hacer un release.
 - Sin build step. `composer.json` mezcla tooling de desarrollo (phpcs/phpstan, `require-dev`,
   no se instala en el ZIP) con una única dependencia de producción: `yahnis-elsts/plugin-update-checker`
   (`require`), que sí viaja dentro del plugin — ver sección de actualizaciones automáticas abajo.

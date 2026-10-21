@@ -7,6 +7,13 @@ y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-21
+
+### Corregido
+
+- Corrige el autor del plugin mostrado en WordPress: ahora aparece "Planea Soluciones" en vez de un nombre personal
+- Añade `readme.txt` para que WordPress muestre la descripción y el historial de cambios en "Ver detalles" del plugin
+
 ## [1.4.0] - 2026-10-21
 
 ### Añadido
