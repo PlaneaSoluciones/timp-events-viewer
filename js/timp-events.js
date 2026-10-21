@@ -26,6 +26,7 @@
         $.ajax({
             url: timpEvents.ajaxurl,
             type: 'POST',
+            timeout: 20000,
             data: {
                 action: 'timp_get_events',
                 nonce: timpEvents.nonce,
@@ -61,11 +62,25 @@
                     showError(response.data.message || 'Error al cargar las sesiones');
                 }
             },
-            error: function () {
+            error: function (jqXHR, textStatus) {
                 $loading.hide();
-                showError('Error de conexión. Por favor, intenta de nuevo.');
+                showError(buildConnectionErrorMessage(jqXHR, textStatus));
             }
         });
+    }
+
+    // Construir un mensaje de error de conexión que distinga la causa real
+    function buildConnectionErrorMessage(jqXHR, textStatus) {
+        if (textStatus === 'timeout') {
+            return 'TIMP está tardando más de lo normal en responder. Vuelve a intentarlo en unos minutos.';
+        }
+        if (jqXHR.status === 0) {
+            return 'No se ha podido contactar con el servidor. Comprueba tu conexión e inténtalo de nuevo.';
+        }
+        if (textStatus === 'parsererror') {
+            return 'El servidor ha devuelto una respuesta inválida. Inténtalo de nuevo (código: parsererror).';
+        }
+        return 'Error de conexión (código ' + jqXHR.status + '). Por favor, intenta de nuevo.';
     }
 
     // Formatear fecha local como YYYY-MM-DD sin problemas de timezone
