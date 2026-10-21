@@ -7,6 +7,12 @@ y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-21
+
+### Añadido
+
+- Actualizaciones automáticas desde el propio WordPress: al publicar una nueva Release en GitHub, el admin ve el aviso habitual de "Hay una nueva versión disponible" y puede actualizar con un clic, sin descargar ni subir el ZIP a mano
+
 ## [1.3.5] - 2026-10-21
 
 ### Corregido
