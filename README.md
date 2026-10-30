@@ -1,6 +1,6 @@
 # TIMP Events Viewer - Plugin para WordPress
 
-Plugin oficial para mostrar sesiones/eventos de TIMP con navegación por semanas. Integración directa con la API de TIMP v1.
+Plugin WordPress para mostrar sesiones/eventos de TIMP con navegación por semanas. Integración directa con la API de TIMP v1.
 
 ## 📜 Changelog
 
