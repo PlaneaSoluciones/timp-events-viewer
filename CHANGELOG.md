@@ -7,6 +7,8 @@ y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-07
+
 ### Añadido
 
 - Registro de errores en Ajustes > TIMP Events: muestra los últimos 50 errores al conectar con TIMP (también los que ven los visitantes en el calendario), con fecha, origen, detalles y número de repeticiones, y un botón para vaciarlo
