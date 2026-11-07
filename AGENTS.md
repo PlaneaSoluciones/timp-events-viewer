@@ -34,11 +34,15 @@ No hay build ni servidor local: es un plugin que se instala copiando la carpeta 
   llamadas a la API de TIMP (`get_authorized_centers`, `get_center_activities`,
   `get_activity_admissions`, `get_all_sessions`), endpoint AJAX `ajax_get_events` (con caché de
   5 min vía transients, por centro+semana) y el shortcode `[timp_events]`.
+  Registro de errores: `log_error()` guarda los últimos `ERROR_LOG_MAX` (50) errores de conexión
+  con TIMP en la opción `timp_error_log` (agrupa repetidos consecutivos) y además los manda al log
+  de PHP con prefijo `[TIMP]`; se ve y se vacía en la tarjeta «📜 Registro de errores» de
+  Ajustes > TIMP Events. Llamar a `log_error()` en todo fallo nuevo de la API.
 - `js/timp-events.js` — navegación por semanas/días y render de las tarjetas de sesión, vía
   AJAX a `admin-ajax.php` (acción `timp_get_events`).
 - `css/timp-events.css` — estilos de las tarjetas y navegación.
 - `uninstall.php` — limpia las opciones (`timp_api_key`, `timp_center_uuid`,
-  `timp_booking_url`) al desinstalar el plugin desde WordPress.
+  `timp_booking_url`, `timp_error_log`) al desinstalar el plugin desde WordPress.
 - `readme.txt` (formato WordPress.org) — Plugin Update Checker lo lee del repo de GitHub para
   rellenar el popup "Ver detalles" cuando hay una actualización disponible (descripción, FAQ,
   changelog). Mantenerlo sincronizado con `CHANGELOG.md` al hacer un release.
@@ -88,6 +92,6 @@ fecha), bump de `Version` en la cabecera de `timp-events-viewer.php`, commit pro
   se hace una llamada secuencial por actividad; con la caché de 5 min el impacto es bajo, pero
   si el centro tiene muchas actividades seguiría siendo la parte más lenta de una petición en
   cache miss.
-- **Pestaña de diagnóstico en el admin**: mostrar la última respuesta cruda de TIMP (activities
-  + primeras admissions) ayudaría a diagnosticar casos como el de actividades que no aparecen
-  sin tener que mirar `debug.log` a mano.
+- **Respuesta cruda de TIMP en el admin**: el registro de errores (v1.5.0) cubre los fallos,
+  pero no los casos sin error (p. ej. actividades que no aparecen). Mostrar junto a él la última
+  respuesta cruda de TIMP (activities + primeras admissions) ayudaría a diagnosticarlos.

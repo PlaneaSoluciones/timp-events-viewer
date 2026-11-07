@@ -251,7 +251,8 @@ if (event.tu_campo) {
 - Asegúrate de que el centro haya autorizado tu aplicación
 - Comprueba que el ID del Centro sea correcto
 - Revisa la consola del navegador (F12) para ver errores JavaScript
-- Comprueba los logs de WordPress en `wp-content/debug.log`
+- Revisa la tarjeta **📜 Registro de errores** en Ajustes > TIMP Events: guarda los últimos 50 errores de conexión con TIMP (también los que ven los visitantes), con fecha, mensaje, detalles y semana o actividad afectada
+- En el log de PHP (`wp-content/debug.log` con `WP_DEBUG_LOG`, o el `error.log` del sitio) los errores salen con el prefijo `[TIMP]`
 
 ### Error: "API Access Key inválida"
 
