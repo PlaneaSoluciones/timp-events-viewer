@@ -37,7 +37,7 @@ Detalles completos de configuración y de la API de TIMP en el [README del repos
 
 = No aparecen sesiones =
 
-Verifica que el centro haya autorizado tu aplicación en el panel de TIMP y que la API Access Key sea correcta. Usa el botón "Probar Conexión" en Ajustes > TIMP Events para diagnosticarlo.
+Verifica que el centro haya autorizado tu aplicación en el panel de TIMP y que la API Access Key sea correcta. Usa el botón "Probar Conexión" en Ajustes > TIMP Events para diagnosticarlo y revisa el "Registro de errores" de esa misma página, que guarda los últimos errores de conexión con TIMP aunque nadie los haya notificado.
 
 = ¿Se actualiza solo? =
 
