@@ -4,7 +4,7 @@
  * Plugin Name: TIMP Events Viewer
  * Plugin URI: https://github.com/PlaneaSoluciones/timp-events-viewer/
  * Description: Muestra eventos de TIMP con navegación por semanas
- * Version: 1.4.1
+ * Version: 1.5.0
  * Requires at least: 5.0
  * Requires PHP: 8.2
  * Author: Planea Soluciones
@@ -42,12 +42,19 @@ class TIMP_Events_Plugin
 
     private $api_url = 'https://api.timp.pro/api';
 
+    // Opción donde se guardan los últimos errores de conexión con TIMP (visibles en Ajustes)
+    const ERROR_LOG_OPTION = 'timp_error_log';
+
+    // Máximo de entradas que se conservan en el registro de errores
+    const ERROR_LOG_MAX = 50;
+
     public function __construct()
     {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('admin_init', array($this, 'handle_test_connection'));
         add_action('admin_init', array($this, 'handle_fetch_centers'));
+        add_action('admin_init', array($this, 'handle_clear_error_log'));
         add_shortcode('timp_events', array($this, 'render_events_shortcode'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('wp_ajax_timp_get_events', array($this, 'ajax_get_events'));
@@ -96,6 +103,7 @@ class TIMP_Events_Plugin
         $centers = $this->get_authorized_centers();
 
         if (isset($centers['error'])) {
+            $this->log_error('Obtener centros', $centers['error'], $centers['details'] ?? '');
             add_settings_error('timp_events_settings', 'timp_fetch_error', $centers['error'], 'error');
         } else {
             $count = is_array($centers) ? count($centers) : 0;
@@ -148,6 +156,7 @@ class TIMP_Events_Plugin
         $result = $this->get_all_sessions($center_uuid, $start_date, $end_date);
 
         if (isset($result['error'])) {
+            $this->log_error('Prueba de conexión', $result['error'], $result['details'] ?? '');
             $error_msg = '<strong>Error de conexión:</strong><br>' . esc_html($result['error']);
             if (isset($result['details'])) {
                 $error_msg .= '<br><br><strong>Detalles:</strong><br>' . esc_html($result['details']);
@@ -162,6 +171,135 @@ class TIMP_Events_Plugin
                 'success'
             );
         }
+    }
+
+    /**
+     * Registra un error de conexión con TIMP.
+     *
+     * Se guarda en la opción ERROR_LOG_OPTION (consultable desde Ajustes > TIMP Events) y
+     * también en el log de PHP con el prefijo [TIMP]. Si el error es idéntico al último
+     * registrado, solo se incrementa su contador para no llenar el registro con repeticiones
+     * (cada visitante que abre el calendario durante una caída generaría una entrada).
+     *
+     * @param string               $context Dónde ocurrió (calendario, prueba de conexión...).
+     * @param string               $message Mensaje de error.
+     * @param string               $details Detalles adicionales, si los hay.
+     * @param array<string,string> $extra   Datos de contexto (semana, actividad...).
+     */
+    private function log_error($context, $message, $details = '', $extra = array())
+    {
+        $log = get_option(self::ERROR_LOG_OPTION, array());
+        if (!is_array($log)) {
+            $log = array();
+        }
+
+        $now = current_time('mysql');
+        $last = end($log);
+
+        if (
+            is_array($last)
+            && $last['context'] === $context
+            && $last['message'] === $message
+            && $last['details'] === $details
+            && $last['extra'] === $extra
+        ) {
+            $log[key($log)]['count']++;
+            $log[key($log)]['last_seen'] = $now;
+        } else {
+            $log[] = array(
+                'time' => $now,
+                'last_seen' => $now,
+                'count' => 1,
+                'context' => $context,
+                'message' => $message,
+                'details' => $details,
+                'extra' => $extra
+            );
+            $log = array_slice($log, -self::ERROR_LOG_MAX);
+        }
+
+        update_option(self::ERROR_LOG_OPTION, $log, false);
+
+        $line = '[TIMP] ' . $context . ': ' . $message;
+        if ($details !== '') {
+            $line .= ' | ' . $details;
+        }
+        foreach ($extra as $key => $value) {
+            $line .= ' | ' . $key . '=' . $value;
+        }
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- copia también al log de PHP del servidor
+        error_log($line);
+    }
+
+    // Vaciar el registro de errores desde la página de ajustes
+    public function handle_clear_error_log()
+    {
+        if (!isset($_POST['timp_clear_error_log']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'] ?? '')), 'timp_clear_error_log_nonce')) {
+            return;
+        }
+
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        delete_option(self::ERROR_LOG_OPTION);
+        add_settings_error('timp_events_settings', 'timp_log_cleared', 'Registro de errores vaciado.', 'success');
+    }
+
+    // Tarjeta con los últimos errores registrados
+    private function render_error_log()
+    {
+        $log = get_option(self::ERROR_LOG_OPTION, array());
+        if (!is_array($log)) {
+            $log = array();
+        }
+        $log = array_reverse($log);
+    ?>
+        <div class="card" style="margin-top: 20px; max-width: none;">
+            <h2>📜 Registro de errores</h2>
+            <p>Últimos <?php echo (int) self::ERROR_LOG_MAX; ?> errores al conectar con TIMP (los más recientes primero), incluidos los que ven los visitantes en el calendario. Los errores repetidos seguidos se agrupan.</p>
+            <?php if (empty($log)): ?>
+                <p><em>No hay errores registrados.</em></p>
+            <?php else: ?>
+                <table class="widefat striped">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Veces</th>
+                            <th>Origen</th>
+                            <th>Error</th>
+                            <th>Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($log as $entry): ?>
+                            <tr>
+                                <td>
+                                    <?php echo esc_html($entry['time']); ?>
+                                    <?php if ($entry['count'] > 1): ?>
+                                        <br><small>última: <?php echo esc_html($entry['last_seen']); ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo (int) $entry['count']; ?></td>
+                                <td><?php echo esc_html($entry['context']); ?></td>
+                                <td><?php echo esc_html($entry['message']); ?></td>
+                                <td>
+                                    <?php echo esc_html($entry['details']); ?>
+                                    <?php foreach ((array) $entry['extra'] as $key => $value): ?>
+                                        <br><small><?php echo esc_html($key . ': ' . $value); ?></small>
+                                    <?php endforeach; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <form method="post" action="" style="margin-top: 10px;">
+                    <?php wp_nonce_field('timp_clear_error_log_nonce'); ?>
+                    <input type="submit" name="timp_clear_error_log" class="button button-secondary" value="Vaciar registro">
+                </form>
+            <?php endif; ?>
+        </div>
+    <?php
     }
 
     // Página de configuración
@@ -269,6 +407,8 @@ class TIMP_Events_Plugin
                     <input type="submit" name="timp_test_connection" class="button button-secondary" value="Probar Conexión a la API">
                 </form>
             </div>
+
+            <?php $this->render_error_log(); ?>
 
             <div class="card">
                 <h2>📋 Instrucciones de Configuración</h2>
@@ -500,6 +640,20 @@ class TIMP_Events_Plugin
         foreach ($activities as $activity) {
             $admissions = $this->get_activity_admissions($activity['uuid'], $start_date, $end_date);
 
+            // Un fallo en una actividad no tumba el resto, pero lo dejamos registrado: si no,
+            // esa actividad desaparece del calendario sin que nadie sepa por qué.
+            if (isset($admissions['error'])) {
+                $this->log_error(
+                    'Sesiones de actividad',
+                    $admissions['error'],
+                    $admissions['details'] ?? '',
+                    array(
+                        'actividad' => $activity['name'] ?? $activity['uuid'],
+                        'semana' => $start_date . ' / ' . $end_date
+                    )
+                );
+            }
+
             if (!isset($admissions['error']) && is_array($admissions)) {
                 // Agregar información de la actividad a cada admission
                 foreach ($admissions as $admission) {
@@ -551,7 +705,7 @@ class TIMP_Events_Plugin
         $center_uuid = get_option('timp_center_uuid');
 
         if (empty($center_uuid)) {
-            error_log('TIMP: Centro UUID no configurado');
+            $this->log_error('Calendario (web)', 'UUID del Centro no configurado');
             wp_send_json_error(array(
                 'message' => 'UUID del Centro no configurado'
             ));
@@ -565,11 +719,7 @@ class TIMP_Events_Plugin
         $sessions = get_transient($cache_key);
 
         if ($sessions === false) {
-            error_log('TIMP: Obteniendo sesiones para centro ' . $center_uuid . ' desde ' . $start_date . ' hasta ' . $end_date);
-
             $sessions = $this->get_all_sessions($center_uuid, $start_date, $end_date);
-
-            error_log('TIMP: Sesiones obtenidas: ' . count($sessions));
 
             // Solo cacheamos resultados válidos: un fallo puntual de TIMP no debe
             // quedar "pegado" durante el TTL completo.
@@ -588,7 +738,12 @@ class TIMP_Events_Plugin
                 $error_response['details'] = $sessions['details'];
             }
 
-            error_log('TIMP Error: ' . $sessions['error']);
+            $this->log_error(
+                'Calendario (web)',
+                $sessions['error'],
+                $sessions['details'] ?? '',
+                array('semana' => $start_date . ' / ' . $end_date)
+            );
             wp_send_json_error($error_response);
         }
 
