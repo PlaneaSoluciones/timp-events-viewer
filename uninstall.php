@@ -8,3 +8,4 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 delete_option('timp_api_key');
 delete_option('timp_center_uuid');
 delete_option('timp_booking_url');
+delete_option('timp_error_log');

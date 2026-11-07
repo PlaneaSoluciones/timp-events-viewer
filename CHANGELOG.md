@@ -7,6 +7,15 @@ y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Añadido
+
+- Registro de errores en Ajustes > TIMP Events: muestra los últimos 50 errores al conectar con TIMP (también los que ven los visitantes en el calendario), con fecha, origen, detalles y número de repeticiones, y un botón para vaciarlo
+- Se registran también los fallos de una actividad concreta, que antes hacían desaparecer sus sesiones del calendario sin dejar rastro
+
+### Cambiado
+
+- El log de PHP ya no recibe dos líneas por cada carga correcta del calendario; solo errores, con prefijo `[TIMP]` e incluyendo los detalles
+
 ## [1.4.1] - 2026-10-21
 
 ### Corregido
