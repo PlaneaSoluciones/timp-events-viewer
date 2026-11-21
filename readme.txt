@@ -2,7 +2,7 @@
 Contributors: planeasoluciones
 Tags: timp, eventos, reservas, pilates, calendario
 Requires at least: 5.0
-Tested up to: 7.1
+Tested up to: 7.1.5
 Requires PHP: 8.2
 Stable tag: 1.5.0
 License: GPLv2 or later

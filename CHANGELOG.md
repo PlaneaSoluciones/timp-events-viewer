@@ -7,6 +7,11 @@ y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Cambiado
+
+- Las actualizaciones automáticas desde GitHub usan Plugin Update Checker 6.0 (antes 5.7), que corrige avisos de seguridad de su librería Markdown
+- Probado con WordPress 7.1.5
+
 ## [1.5.0] - 2026-11-07
 
 ### Añadido
