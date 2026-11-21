@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/PlaneaSoluciones/timp-events-viewer/
  * Description: Muestra eventos de TIMP con navegación por semanas
  * Version: 1.5.1
- * Requires at least: 5.0
+ * Requires at least: 6.1
  * Requires PHP: 8.2
  * Author: Planea Soluciones
  * Author URI: https://planeasoluciones.com
@@ -20,7 +20,9 @@ if (!defined('ABSPATH')) {
 
 // Comprobación de actualizaciones contra las Releases de GitHub (Plugin Update Checker).
 // El ZIP adjunto a cada Release ya lo genera release-php.yml sin ficheros de desarrollo.
-if (is_admin() && file_exists(__DIR__ . '/vendor/autoload.php')) {
+// Se carga en todas las peticiones, no solo en wp-admin: WP-Cron y la sincronización de MainWP
+// también tienen que ver la actualización.
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 
     $timp_events_update_checker = \YahnisElsts\PluginUpdateChecker\v6\PucFactory::buildUpdateChecker(

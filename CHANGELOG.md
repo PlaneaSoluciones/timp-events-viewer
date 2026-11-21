@@ -7,6 +7,14 @@ y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Cambiado
+
+- Requiere WordPress 6.1 o superior (antes 5.0), la primera versión compatible con PHP 8.2
+
+### Corregido
+
+- Las actualizaciones desde GitHub también se detectan en segundo plano (WP-Cron) y desde MainWP, no solo al entrar en el escritorio de WordPress
+
 ## [1.5.1] - 2026-11-21
 
 ### Cambiado

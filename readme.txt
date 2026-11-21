@@ -1,7 +1,7 @@
 === TIMP Events Viewer ===
 Contributors: planeasoluciones
 Tags: timp, eventos, reservas, pilates, calendario
-Requires at least: 5.0
+Requires at least: 6.1
 Tested up to: 7.1
 Requires PHP: 8.2
 Stable tag: 1.5.1

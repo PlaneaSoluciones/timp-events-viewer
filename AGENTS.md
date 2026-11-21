@@ -54,7 +54,7 @@ No hay build ni servidor local: es un plugin que se instala copiando la carpeta 
 
 - `pr-title-lint.yml` — valida Conventional Commits en el título de los PRs
 - `secret-scan.yml` — gitleaks en cada push/PR
-- `lint-php.yml` — `php -l` + PHPCS (WordPress Coding Standards) + PHPStan (nivel 5) en cada push/PR
+- `lint-php.yml` — `php -l` en matriz 8.2–8.5 + PHPCS (WordPress Coding Standards) + PHPStan (nivel 5) en cada push/PR
 - `.github/dependabot.yml` — PRs semanales (lunes) con saltos de major de Composer y versiones
   nuevas de las GitHub Actions; alertas y *security updates* activadas en el repo
 - `release-php.yml` — al pushear un tag `v*`: corre `composer install --no-dev` (solo trae el
@@ -72,7 +72,7 @@ Desde v1.4.0 el plugin integra [Plugin Update Checker](https://github.com/Yahnis
 apuntando al repo de GitHub y con `enableReleaseAssets()` para que use el ZIP adjunto a la
 Release (el que genera `release-php.yml`) en vez de empaquetar el código fuente crudo del tag.
 
-- Solo corre en `is_admin()` — no carga nada en el front-end.
+- Se carga en todas las peticiones, no solo en `is_admin()`: WP-Cron y la sincronización de MainWP también tienen que ver la actualización.
 - WordPress detecta la actualización de forma nativa (Plugins > "Hay una nueva versión
   disponible") y se instala con un clic, sin tocar GitHub a mano.
 - Requiere que el repo siga siendo público (no usa token de GitHub); si se vuelve privado hay
@@ -88,6 +88,7 @@ fecha), bump de `Version` en la cabecera de `timp-events-viewer.php`, commit pro
 
 ## Pendientes
 
+- **PHPCS 4**: no se puede subir mientras WordPress Coding Standards exija `squizlabs/php_codesniffer ^3.13.5` (WPCS 3.4.1, 21/11/2026).
 - **i18n**: las cadenas visibles para el usuario no están envueltas en `__()`/`esc_html_e()`
   pese a declarar `Text Domain: timp-events` en la cabecera — el plugin no es traducible hoy.
 - **Paralelizar llamadas a TIMP** (`curl_multi` o similar) en `get_all_sessions()`: ahora mismo
@@ -97,3 +98,8 @@ fecha), bump de `Version` en la cabecera de `timp-events-viewer.php`, commit pro
 - **Respuesta cruda de TIMP en el admin**: el registro de errores (v1.5.0) cubre los fallos,
   pero no los casos sin error (p. ej. actividades que no aparecen). Mostrar junto a él la última
   respuesta cruda de TIMP (activities + primeras admissions) ayudaría a diagnosticarlos.
+
+## Documentación operacional
+
+- Página del plugin: https://bookstack.planea.com.es/link/552
+- Mantenimiento de plugins WordPress propios (PUC, dependencias, política de PHP): https://bookstack.planea.com.es/link/626
