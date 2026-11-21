@@ -7,6 +7,8 @@ y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-11-21
+
 ### Cambiado
 
 - Requiere WordPress 6.1 o superior (antes 5.0), la primera versión compatible con PHP 8.2
