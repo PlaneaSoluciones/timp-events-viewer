@@ -4,7 +4,7 @@ Tags: timp, eventos, reservas, pilates, calendario
 Requires at least: 6.1
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.5.1
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,10 @@ Verifica que el centro haya autorizado tu aplicación en el panel de TIMP y que 
 Sí, desde la versión 1.4.0 el plugin comprueba las Releases de GitHub y muestra el aviso de actualización habitual de WordPress.
 
 == Changelog ==
+
+= 1.6.0 =
+* Requiere WordPress 6.1 o superior (antes 5.0), la primera versión compatible con PHP 8.2
+* Las actualizaciones desde GitHub también se detectan en segundo plano (WP-Cron) y desde MainWP, no solo al entrar en el escritorio de WordPress
 
 = 1.5.1 =
 * Las actualizaciones automáticas desde GitHub usan Plugin Update Checker 6.0 (antes 5.7), que corrige avisos de seguridad de su librería Markdown

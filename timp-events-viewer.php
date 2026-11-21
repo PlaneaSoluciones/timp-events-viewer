@@ -4,7 +4,7 @@
  * Plugin Name: TIMP Events Viewer
  * Plugin URI: https://github.com/PlaneaSoluciones/timp-events-viewer/
  * Description: Muestra eventos de TIMP con navegación por semanas
- * Version: 1.5.1
+ * Version: 1.6.0
  * Requires at least: 6.1
  * Requires PHP: 8.2
  * Author: Planea Soluciones
