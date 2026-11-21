@@ -72,7 +72,7 @@ Desde v1.4.0 el plugin integra [Plugin Update Checker](https://github.com/Yahnis
 apuntando al repo de GitHub y con `enableReleaseAssets()` para que use el ZIP adjunto a la
 Release (el que genera `release-php.yml`) en vez de empaquetar el código fuente crudo del tag.
 
-- Solo corre en `is_admin()` — no carga nada en el front-end.
+- Se carga en todas las peticiones, no solo en `is_admin()`: WP-Cron y la sincronización de MainWP también tienen que ver la actualización.
 - WordPress detecta la actualización de forma nativa (Plugins > "Hay una nueva versión
   disponible") y se instala con un clic, sin tocar GitHub a mano.
 - Requiere que el repo siga siendo público (no usa token de GitHub); si se vuelve privado hay
