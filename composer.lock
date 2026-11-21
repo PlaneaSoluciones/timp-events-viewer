@@ -4,30 +4,30 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "47830927fc3c37bdbb922b4829273c97",
+    "content-hash": "2abc97b39680f0e766c5918d8b5b2539",
     "packages": [
         {
             "name": "yahnis-elsts/plugin-update-checker",
-            "version": "v5.7",
+            "version": "v6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/YahnisElsts/plugin-update-checker.git",
-                "reference": "275a96a2a18d03c34c87f35cb68673c8c49ac3b1"
+                "reference": "bb71d4eaf1e83b645d5ae368eb4f2f6986752b5d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/YahnisElsts/plugin-update-checker/zipball/275a96a2a18d03c34c87f35cb68673c8c49ac3b1",
-                "reference": "275a96a2a18d03c34c87f35cb68673c8c49ac3b1",
+                "url": "https://api.github.com/repos/YahnisElsts/plugin-update-checker/zipball/bb71d4eaf1e83b645d5ae368eb4f2f6986752b5d",
+                "reference": "bb71d4eaf1e83b645d5ae368eb4f2f6986752b5d",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": ">=5.6.20"
+                "php": ">=7.4"
             },
             "type": "library",
             "autoload": {
                 "files": [
-                    "load-v5p7.php"
+                    "load-v6p0.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -52,9 +52,9 @@
             ],
             "support": {
                 "issues": "https://github.com/YahnisElsts/plugin-update-checker/issues",
-                "source": "https://github.com/YahnisElsts/plugin-update-checker/tree/v5.7"
+                "source": "https://github.com/YahnisElsts/plugin-update-checker/tree/v6.0"
             },
-            "time": "2026-05-26T12:48:45+00:00"
+            "time": "2026-11-06T15:04:15+00:00"
         }
     ],
     "packages-dev": [
@@ -383,11 +383,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.3.1",
+            "version": "2.3.7",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6155239b488e95d26d1ebd95c6b4bb294d7f09db",
-                "reference": "6155239b488e95d26d1ebd95c6b4bb294d7f09db",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/90c91c2498849ab8cc4e873864bbf1cb2bf6ea12",
+                "reference": "90c91c2498849ab8cc4e873864bbf1cb2bf6ea12",
                 "shasum": ""
             },
             "require": {
@@ -443,7 +443,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-08T21:09:11+00:00"
+            "time": "2026-11-19T10:31:11+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
@@ -656,12 +656,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.2,<8.6"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }
