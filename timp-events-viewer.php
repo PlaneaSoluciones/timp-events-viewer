@@ -23,7 +23,7 @@ if (!defined('ABSPATH')) {
 if (is_admin() && file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 
-    $timp_events_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+    $timp_events_update_checker = \YahnisElsts\PluginUpdateChecker\v6\PucFactory::buildUpdateChecker(
         'https://github.com/PlaneaSoluciones/timp-events-viewer/',
         __FILE__,
         'timp-events-viewer'
@@ -31,7 +31,7 @@ if (is_admin() && file_exists(__DIR__ . '/vendor/autoload.php')) {
 
     // getVcsApi() devuelve el tipo base Vcs\Api; enableReleaseAssets() solo existe en la
     // implementación concreta de GitHub, cuyo nombre de clase real vive en un namespace
-    // versionado interno de la librería (ej. v5p7) que cambia con cada actualización —
+    // versionado interno de la librería (ej. v6p0) que cambia con cada actualización —
     // por eso no se puede comprobar con instanceof sin acoplarse a esa versión interna.
     // @phpstan-ignore method.notFound
     $timp_events_update_checker->getVcsApi()->enableReleaseAssets();

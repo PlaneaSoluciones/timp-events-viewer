@@ -55,6 +55,8 @@ No hay build ni servidor local: es un plugin que se instala copiando la carpeta 
 - `pr-title-lint.yml` — valida Conventional Commits en el título de los PRs
 - `secret-scan.yml` — gitleaks en cada push/PR
 - `lint-php.yml` — `php -l` + PHPCS (WordPress Coding Standards) + PHPStan (nivel 5) en cada push/PR
+- `.github/dependabot.yml` — PRs semanales (lunes) con saltos de major de Composer y versiones
+  nuevas de las GitHub Actions; alertas y *security updates* activadas en el repo
 - `release-php.yml` — al pushear un tag `v*`: corre `composer install --no-dev` (solo trae el
   Plugin Update Checker, no las herramientas de lint), genera el ZIP del plugin con ese `vendor/`
   reducido dentro, extrae las notas de `CHANGELOG.md` y crea la GitHub Release con el ZIP adjunto
@@ -84,7 +86,7 @@ Seguir el proceso estándar PHP/WordPress: actualizar `CHANGELOG.md` ([Unrelease
 fecha), bump de `Version` en la cabecera de `timp-events-viewer.php`, commit propio
 `chore: bump version to X.Y.Z`, tag `vX.Y.Z`, push. El workflow de release hace el resto.
 
-## Propuestas pendientes (no implementadas, valorar en el futuro)
+## Pendientes
 
 - **i18n**: las cadenas visibles para el usuario no están envueltas en `__()`/`esc_html_e()`
   pese a declarar `Text Domain: timp-events` en la cabecera — el plugin no es traducible hoy.
