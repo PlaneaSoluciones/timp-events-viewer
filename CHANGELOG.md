@@ -7,6 +7,10 @@ y este proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Cambiado
+
+- El registro de errores muestra cada incidencia con su inicio y su fin (cuando TIMP vuelve a responder bien), cuántas veces falló y la hora del último fallo; un mismo error ya no se parte en varias filas por cambiar de semana o intercalarse con otros
+
 ## [1.6.0] - 2026-11-21
 
 ### Cambiado

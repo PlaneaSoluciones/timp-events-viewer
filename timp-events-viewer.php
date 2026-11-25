@@ -108,6 +108,7 @@ class TIMP_Events_Plugin
             $this->log_error('Obtener centros', $centers['error'], $centers['details'] ?? '');
             add_settings_error('timp_events_settings', 'timp_fetch_error', $centers['error'], 'error');
         } else {
+            $this->resolve_errors(array('Obtener centros'));
             $count = is_array($centers) ? count($centers) : 0;
             $center_names = array_map(function ($c) {
                 return $c['name'];
@@ -196,29 +197,35 @@ class TIMP_Events_Plugin
         }
 
         $now = current_time('mysql');
-        $last = end($log);
+        $key = $this->error_group_key($context, $message, $details, $extra);
+        $entry = null;
 
-        if (
-            is_array($last)
-            && $last['context'] === $context
-            && $last['message'] === $message
-            && $last['details'] === $details
-            && $last['extra'] === $extra
-        ) {
-            $log[key($log)]['count']++;
-            $log[key($log)]['last_seen'] = $now;
-        } else {
-            $log[] = array(
+        // Mientras un error siga sin resolverse, cada repetición suma al mismo grupo (aunque
+        // entre medias haya otros errores o cambie la semana consultada) y pasa a ser el más reciente.
+        foreach ($log as $i => $item) {
+            if (is_array($item) && empty($item['resolved']) && $this->error_group_key($item['context'], $item['message'], $item['details'], (array) $item['extra']) === $key) {
+                $entry = $item;
+                unset($log[$i]);
+                break;
+            }
+        }
+
+        if ($entry === null) {
+            $entry = array(
                 'time' => $now,
-                'last_seen' => $now,
-                'count' => 1,
+                'count' => 0,
+                'resolved' => '',
                 'context' => $context,
                 'message' => $message,
-                'details' => $details,
-                'extra' => $extra
+                'details' => $details
             );
-            $log = array_slice($log, -self::ERROR_LOG_MAX);
         }
+        $entry['count']++;
+        $entry['last_seen'] = $now;
+        $entry['extra'] = $extra;
+
+        $log[] = $entry;
+        $log = array_slice(array_values($log), -self::ERROR_LOG_MAX);
 
         update_option(self::ERROR_LOG_OPTION, $log, false);
 
@@ -231,6 +238,44 @@ class TIMP_Events_Plugin
         }
         // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- copia también al log de PHP del servidor
         error_log($line);
+    }
+
+    // La semana no cuenta para agrupar: un fallo de conexión es el mismo consulte la semana que consulte
+    private function error_group_key($context, $message, $details, $extra)
+    {
+        unset($extra['semana']);
+        ksort($extra);
+        return wp_json_encode(array($context, $message, $details, $extra));
+    }
+
+    /**
+     * Marca como resueltos los errores abiertos de esos orígenes cuando TIMP vuelve a responder bien.
+     *
+     * @param string[]             $contexts Orígenes que ya funcionan.
+     * @param array<string,string> $extra    Si se indica, solo los errores con esos datos (p. ej. una actividad).
+     */
+    private function resolve_errors($contexts, $extra = array())
+    {
+        $log = get_option(self::ERROR_LOG_OPTION, array());
+        if (!is_array($log) || empty($log)) {
+            return;
+        }
+
+        $changed = false;
+        foreach ($log as $i => $item) {
+            if (!is_array($item) || !empty($item['resolved']) || !in_array($item['context'], $contexts, true)) {
+                continue;
+            }
+            if (array_diff_assoc($extra, (array) $item['extra'])) {
+                continue;
+            }
+            $log[$i]['resolved'] = current_time('mysql');
+            $changed = true;
+        }
+
+        if ($changed) {
+            update_option(self::ERROR_LOG_OPTION, $log, false);
+        }
     }
 
     // Vaciar el registro de errores desde la página de ajustes
@@ -259,16 +304,16 @@ class TIMP_Events_Plugin
     ?>
         <div class="card" style="margin-top: 20px; max-width: none;">
             <h2>📜 Registro de errores</h2>
-            <p>Últimos <?php echo (int) self::ERROR_LOG_MAX; ?> errores al conectar con TIMP (los más recientes primero), incluidos los que ven los visitantes en el calendario. Los errores repetidos seguidos se agrupan.</p>
+            <p>Últimos <?php echo (int) self::ERROR_LOG_MAX; ?> errores al conectar con TIMP (los más recientes primero), incluidos los que ven los visitantes en el calendario. Un mismo error cuenta como una sola incidencia hasta que TIMP vuelve a responder bien: ese momento es el «Fin».</p>
             <?php if (empty($log)): ?>
                 <p><em>No hay errores registrados.</em></p>
             <?php else: ?>
                 <table class="widefat striped">
                     <thead>
                         <tr>
-                            <th>Fecha</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
                             <th>Veces</th>
-                            <th>Origen</th>
                             <th>Error</th>
                             <th>Detalles</th>
                         </tr>
@@ -276,19 +321,26 @@ class TIMP_Events_Plugin
                     <tbody>
                         <?php foreach ($log as $entry): ?>
                             <tr>
+                                <td><?php echo esc_html($entry['time']); ?></td>
                                 <td>
-                                    <?php echo esc_html($entry['time']); ?>
+                                    <?php if (!empty($entry['resolved'])): ?>
+                                        <?php echo esc_html($entry['resolved']); ?>
+                                    <?php else: ?>
+                                        <strong style="color: #b32d2e;">Sin resolver</strong>
+                                    <?php endif; ?>
                                     <?php if ($entry['count'] > 1): ?>
-                                        <br><small>última: <?php echo esc_html($entry['last_seen']); ?></small>
+                                        <br><small>último fallo: <?php echo esc_html($entry['last_seen']); ?></small>
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo (int) $entry['count']; ?></td>
-                                <td><?php echo esc_html($entry['context']); ?></td>
-                                <td><?php echo esc_html($entry['message']); ?></td>
+                                <td>
+                                    <?php echo esc_html($entry['message']); ?>
+                                    <br><small><?php echo esc_html($entry['context']); ?></small>
+                                </td>
                                 <td>
                                     <?php echo esc_html($entry['details']); ?>
                                     <?php foreach ((array) $entry['extra'] as $key => $value): ?>
-                                        <br><small><?php echo esc_html($key . ': ' . $value); ?></small>
+                                        <br><small><?php echo esc_html(('semana' === $key && $entry['count'] > 1 ? 'última semana' : $key) . ': ' . $value); ?></small>
                                     <?php endforeach; ?>
                                 </td>
                             </tr>
@@ -629,6 +681,9 @@ class TIMP_Events_Plugin
             return $activities;
         }
 
+        // TIMP ha respondido: los fallos de conexión abiertos quedan resueltos
+        $this->resolve_errors(array('Calendario (web)', 'Prueba de conexión', 'Obtener centros'));
+
         if (empty($activities) || !is_array($activities)) {
             return array();
         }
@@ -654,6 +709,10 @@ class TIMP_Events_Plugin
                         'semana' => $start_date . ' / ' . $end_date
                     )
                 );
+            }
+
+            if (!isset($admissions['error'])) {
+                $this->resolve_errors(array('Sesiones de actividad'), array('actividad' => $activity['name'] ?? $activity['uuid']));
             }
 
             if (!isset($admissions['error']) && is_array($admissions)) {
